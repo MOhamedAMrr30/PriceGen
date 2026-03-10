@@ -1,0 +1,38 @@
+# data files (too large for git)
+data/raw/
+data/*.csv
+
+# model pickles
+models/*.pkl
+
+# mlflow store
+mlflow_tracking/
+
+# generated plots
+outputs/
+
+# python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# env
+.env
+.venv/
+venv/
+
+# ide
+.idea/
+.vscode/
+*.swp
+
+# os
+.DS_Store
+Thumbs.db
+
+# jupyter
+.ipynb_checkpoints/

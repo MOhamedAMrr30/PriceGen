@@ -1,0 +1,47 @@
+# Session 3 Walkthrough — FastAPI + Streamlit Dashboard
+
+## What Was Built
+
+A production-ready API and interactive dashboard for the Dynamic Pricing Engine.
+
+## API Endpoints (Verified ✅)
+
+| Endpoint | Method | Status | Response |
+|----------|--------|--------|----------|
+| `/health` | GET | ✅ 200 | `{"status":"ok","model":"xgboost_best_model"}` |
+| `/categories` | GET | ✅ 200 | `["Electronics","Fashion","Home","Beauty","Sports","Other"]` |
+| `/predict` | POST | ✅ 200 | `{"recommended_price_usd": 27.67, "demand_tier": "High", ...}` |
+| `/batch_predict` | POST | ✅ Impl | Max 100 items per batch |
+| `/docs` | GET | ✅ Auto | Swagger UI (auto-generated) |
+
+## Streamlit Dashboard (3 Pages)
+
+1. **Single Item Pricer** — Form inputs + gauge chart showing price vs competitors
+2. **Batch Analyzer** — CSV upload, color-coded results (green=below/red=above/yellow=at market)
+3. **Market Intelligence** — EDA/SHAP chart viewer + key metrics cards with category filter
+
+## Files Created
+
+| File | Description |
+|------|-------------|
+| [api.py](file:///c:/Users/DELL%20E5570%20i5/Desktop/dynamic-pricing-engine/src/api.py) | FastAPI with 4 endpoints, Pydantic validation |
+| [app.py](file:///c:/Users/DELL%20E5570%20i5/Desktop/dynamic-pricing-engine/dashboard/app.py) | 3-page Streamlit dashboard |
+| [Dockerfile](file:///c:/Users/DELL%20E5570%20i5/Desktop/dynamic-pricing-engine/Dockerfile) | python:3.10-slim container |
+| [docker-compose.yml](file:///c:/Users/DELL%20E5570%20i5/Desktop/dynamic-pricing-engine/docker-compose.yml) | API (8000) + Dashboard (8501) |
+| [README.md](file:///c:/Users/DELL%20E5570%20i5/Desktop/dynamic-pricing-engine/README.md) | Professional README with badges, architecture, API docs |
+
+## How to Run
+
+```bash
+# API
+uvicorn src.api:app --host 0.0.0.0 --port 8000
+
+# Dashboard (new terminal)
+streamlit run dashboard/app.py --server.port 8501
+
+# Or with Docker
+docker-compose up --build
+```
+
+> [!NOTE]
+> Both API and dashboard use XGBoost's native `feature_importances_` (weighted by input values) for real-time top factors instead of SHAP, which was too slow for request-time computation. The full SHAP analysis remains available in the pre-generated plots at `outputs/model/`.
