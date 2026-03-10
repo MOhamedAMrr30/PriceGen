@@ -2,8 +2,8 @@
 data/raw/
 data/*.csv
 
-# model pickles
-models/*.pkl
+# model pickles (kept in repo for Streamlit Cloud)
+# models/*.pkl
 
 # mlflow store
 mlflow_tracking/
