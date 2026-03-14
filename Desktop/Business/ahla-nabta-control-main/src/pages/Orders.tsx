@@ -505,7 +505,7 @@ const OrderRow = ({ order, index, onEdit }: { order: any; index: number; onEdit:
     loadLogoBase64().then(setLogoBase64);
   }, []);
 
-  const orderNum = index + 1;
+  const orderNum = index;
 
   const clientType = order.clients?.type || "restaurant";
   const isSuper = clientType === "supermarket";
@@ -587,7 +587,10 @@ const OrderRow = ({ order, index, onEdit }: { order: any; index: number; onEdit:
   return (
     <>
       <TableRow className="cursor-pointer" onClick={() => setShowDetail(!showDetail)}>
-        <TableCell className="font-medium">{order.clients?.name}</TableCell>
+        <TableCell className="font-medium">
+          {order.clients?.name}
+          <span className="ml-2 text-xs font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">#{orderNum}</span>
+        </TableCell>
         <TableCell>{order.order_date}</TableCell>
         <TableCell>{order.delivery_date}</TableCell>
         <TableCell>{Number(order.total_revenue).toFixed(2)}</TableCell>
@@ -747,7 +750,26 @@ const Orders = () => {
     return groups;
   }, [orders]);
 
-  let globalIdx = 0;
+  // Compute per-client order number (oldest order = #1)
+  const clientOrderNumMap = useMemo(() => {
+    if (!orders?.length) return new Map<string, number>();
+    // Sort all orders by order_date ascending (oldest first), then by id for stability
+    const sorted = [...orders].sort((a: any, b: any) => {
+      const dateA = a.order_date || "";
+      const dateB = b.order_date || "";
+      if (dateA !== dateB) return dateA.localeCompare(dateB);
+      return (a.id || "").localeCompare(b.id || "");
+    });
+    const counters = new Map<string, number>();
+    const result = new Map<string, number>();
+    sorted.forEach((o: any) => {
+      const clientId = o.client_id || "";
+      const count = (counters.get(clientId) || 0) + 1;
+      counters.set(clientId, count);
+      result.set(o.id, count);
+    });
+    return result;
+  }, [orders]);
 
   return (
     <div>
@@ -786,8 +808,8 @@ const Orders = () => {
                 ) : (
                   groupedOrders.map((group) => {
                     const rows = group.orders.map((o: any) => {
-                      const idx = globalIdx++;
-                      return <OrderRow key={o.id} order={o} index={idx} onEdit={handleOpenEdit} />;
+                      const clientNum = clientOrderNumMap.get(o.id) || 0;
+                      return <OrderRow key={o.id} order={o} index={clientNum} onEdit={handleOpenEdit} />;
                     });
                     return [
                       <TableRow key={`date-${group.date}`} className="bg-muted/50 hover:bg-muted/50">
